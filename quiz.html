@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kindness to Wildlife Quiz</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #8BC34A;
+            --background: #F1F8E9;
+            --surface: #FFFFFF;
+            --text: #333333;
+            --text-light: #666666;
+            --success: #4CAF50;
+            --error: #F44336;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: var(--surface);
+            max-width: 600px;
+            width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        p.subtitle {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background-color: #E0E0E0;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #2C3E50;
+            line-height: 1.4;
+        }
+
+        .options-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background-color: #F9F9F9;
+            border: 2px solid #E0E0E0;
+            border-radius: var(--border-radius);
+            padding: 18px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            width: 100%;
+            color: var(--text);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #F0F4C3;
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .option-btn.correct {
+            background-color: #E8F5E9;
+            border-color: var(--success);
+            color: #2E7D32;
+            font-weight: bold;
+        }
+
+        .option-btn.incorrect {
+            background-color: #FFEBEE;
+            border-color: var(--error);
+            color: #C62828;
+        }
+
+        .feedback-box {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            line-height: 1.5;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-box.correct {
+            display: block;
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border: 1px solid #C8E6C9;
+        }
+
+        .feedback-box.incorrect {
+            display: block;
+            background-color: #FFEBEE;
+            color: #C62828;
+            border: 1px solid #FFCDD2;
+        }
+
+        .action-btn {
+            margin-top: 25px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            display: none;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .results-screen {
+            display: none;
+        }
+
+        .results-screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin: 20px 0;
+        }
+
+        .badge {
+            font-size: 80px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+
+        .restart-btn {
+            background-color: var(--primary-dark);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: transform 0.2s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div id="quiz-header">
+            <h1>🌱 Kindness to Wildlife Quiz</h1>
+            <p class="subtitle">Let's learn how to be kind and gentle to our wild animal friends!</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="quiz-body">
+            <!-- Questions loaded dynamically -->
+        </div>
+
+        <div id="results-screen" class="results-screen">
+            <div class="badge" id="badge">🏆</div>
+            <h2>Quiz Complete!</h2>
+            <div class="score-display" id="score-display">0/5</div>
+            <p id="result-text" style="font-size: 18px; margin-bottom: 20px; line-height: 1.5;"></p>
+            <button class="restart-btn" onclick="restartQuiz()">Play Again 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "You see a line of tiny ants walking on the sidewalk. What is the kindest thing to do?",
+                options: [
+                    { text: "Carefully step over them so you don't hurt them.", isCorrect: true, feedback: "🌟 Great job! Ants are tiny but they are hard at work. Avoiding stepping on them shows you respect even the smallest living things." },
+                    { text: "Stomp on them to see how fast they can run away.", isCorrect: false, feedback: "❌ Let's protect them. Stomping hurts or kills them. Every living creature feels pain, so we should always look out where we walk!" },
+                    { text: "Try to squish them one by one with a stick.", isCorrect: false, feedback: "❌ Let's be gentle. Poking or squishing bugs harms them. They are an important part of nature's cleanup crew!" }
+                ]
+            },
+            {
+                question: "A little frog is sitting near a pond. Some kids are poking it with a long stick. What should you do?",
+                options: [
+                    { text: "Join in and find a bigger stick to poke it too.", isCorrect: false, feedback: "❌ Let's be kind. Poking wild animals scares them, damages their delicate skin, and causes them stress." },
+                    { text: "Politely ask them to stop, and remind them that it hurts the frog.", isCorrect: true, feedback: "🌟 Awesome! Standing up for animals makes you a true Wildlife Hero. Frogs have very sensitive skin and poking them can hurt them badly." },
+                    { text: "Throw a small rock at the frog to make it jump away faster.", isCorrect: false, feedback: "❌ Oh no! Throwing stones or objects can easily break a frog's tiny bones or cause permanent injuries." }
+                ]
+            },
+            {
+                question: "You find a bird's nest in a bush with beautiful, small speckled eggs inside. What is the best action?",
+                options: [
+                    { text: "Pick up the eggs to show your friends or family.", isCorrect: false, feedback: "❌ Let's keep them safe. Bird eggs are incredibly fragile. Touching them can break them or scare the mother bird away forever." },
+                    { text: "Take one egg home to keep safe in your bedroom.", isCorrect: false, feedback: "❌ Eggs need the warmth of their parents to survive. Taking them away means the baby bird inside won't ever hatch." },
+                    { text: "Admire them quickly from a distance without touching anything.", isCorrect: true, feedback: "🌟 Perfect! Leaving nests completely alone ensures the parent birds feel safe coming back to hatch their babies." }
+                ]
+            },
+            {
+                question: "Some people are throwing bread crusts and stones at ducks at a park lake. What is wrong with this?",
+                options: [
+                    { text: "Nothing, it's just a fun game to play at the park.", isCorrect: false, feedback: "❌ Animals are living things, not targets. Throwing objects scares and hurts them, and bread makes them very sick." },
+                { text: "Throwing stones can seriously injure the ducks, and bread is bad for them.", isCorrect: true, feedback: "🌟 Exactly! Throwing things at animals is cruel and dangerous. It's much better to watch them swim peacefully from the bank." },
+                { text: "It is only bad because you might waste your good snack food.", isCorrect: false, feedback: "❌ While wasting food isn't ideal, the real danger is the physical harm and fear caused to the ducks by throwing stones at them." }
+            ]
+        },
+        {
+            question: "You find a furry caterpillar crawling on a leaf in your garden. How should you treat it?",
+            options: [
+                { text: "Squeeze it tightly to feel how soft it is.", isCorrect: false, feedback: "❌ Caterpillars are extremely fragile! Squeezing them can crush their internal organs and kill them." },
+                { text: "Leave it alone on its leaf to eat and grow into a butterfly.", isCorrect: true, feedback: "🌟 Beautiful choice! Letting bugs live peacefully in their habitat lets them complete their amazing life cycle safely." },
+                { text: "Pull its tiny hairs out to see what it looks like underneath.", isCorrect: false, feedback: "❌ Many caterpillar hairs are meant to protect them. Pulling them hurts the insect and can even give your fingers a painful sting!" }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const quizBody = document.getElementById('quiz-body');
+    const progressFill = document.getElementById('progress-fill');
+    const resultsScreen = document.getElementById('results-screen');
+    const quizHeader = document.getElementById('quiz-header');
+    const scoreDisplay = document.getElementById('score-display');
+    const resultText = document.getElementById('result-text');
+    const badgeDisplay = document.getElementById('badge');
+
+    function loadQuestion() {
+        quizBody.innerHTML = '';
+        const progressPercent = (currentQuestionIndex / quizData.length) * 100;
+        progressFill.style.width = `${progressPercent}%`;
+
+        const currentQuestion = quizData[currentQuestionIndex];
+        const card = document.createElement('div');
+        card.className = 'question-card active';
+
+        const qText = document.createElement('p');
+        qText.className = 'question-text';
+        qText.innerText = `Q${currentQuestionIndex + 1}: ${currentQuestion.question}`;
+        card.appendChild(qText);
+
+        const optionsList = document.createElement('div');
+        optionsList.className = 'options-list';
+
+        currentQuestion.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = option.text;
+            btn.onclick = () => handleAnswerSelect(btn, option, card);
+            optionsList.appendChild(btn);
+        });
+
+        card.appendChild(optionsList);
+
+        const feedbackBox = document.createElement('div');
+        feedbackBox.id = 'feedback-box';
+        feedbackBox.className = 'feedback-box';
+        card.appendChild(feedbackBox);
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'action-btn';
+        nextBtn.id = 'next-btn';
+        nextBtn.innerText = currentQuestionIndex === quizData.length - 1 ? "See Results ✨" : "Next Question ➡️";
+        nextBtn.onclick = handleNextQuestion;
+        card.appendChild(nextBtn);
+
+        quizBody.appendChild(card);
+    }
+
+    function handleAnswerSelect(selectedBtn, selectedOption, card) {
+        const buttons = card.querySelectorAll('.option-btn');
+        const feedbackBox = card.querySelector('#feedback-box');
+        const nextBtn = card.querySelector('#next-btn');
+
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (selectedOption.isCorrect) {
+            selectedBtn.classList.add('correct');
+            feedbackBox.className = 'feedback-box correct';
+            score++;
+        } else {
+            selectedBtn.classList.add('incorrect');
+            feedbackBox.className = 'feedback-box incorrect';
+            
+            const currentQuestion = quizData[currentQuestionIndex];
+            buttons.forEach((btn, idx) => {
+                if (currentQuestion.options[idx].isCorrect) {
+                    btn.classList.add('correct');
+                }
+            });
+        }
+
+        feedbackBox.innerText = selectedOption.feedback;
+        nextBtn.style.display = 'inline-block';
+    }
+
+    function handleNextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizBody.style.display = 'none';
+        quizHeader.style.display = 'none';
+        resultsScreen.classList.add('active');
+        
+        scoreDisplay.innerText = `${score} / ${quizData.length}`;
+        
+        if (score === quizData.length) {
+            badgeDisplay.innerText = "👑";
+            resultText.innerText = "Wow! Perfect score! You are a Certified Wildlife Hero! You treat all living things with absolute kindness and love. Keep making the world a safer place!";
+        } else if (score >= 3) {
+            badgeDisplay.innerText = "🌟";
+            resultText.innerText = "Great job! You care a lot about animals and know how to treat them gently. Keep practicing kindness and sharing your love for nature!";
+        } else {
+            badgeDisplay.innerText = "🌱";
+            resultText.innerText = "Thanks for playing! Every animal matters, big or small. Playing this quiz is a wonderful step toward learning how to be a protective, caring friend to wildlife!";
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        resultsScreen.classList.remove('active');
+        quizBody.style.display = 'block';
+        quizHeader.style.display = 'block';
+        loadQuestion();
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>
